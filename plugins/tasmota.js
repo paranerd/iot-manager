@@ -6,7 +6,8 @@ class Tasmota {
         const devices = [];
         const currentFirmware = await this.getCurrentFirmwareVersion();
 
-        for (let i = 1; i <= 254; i++) {
+        for (let i = 52; i <= 52; i++) {
+            //for (let i = 1; i <= 254; i++) {
             console.log(`Scanning ${ipPrefix}${i}...`);
 
             try {

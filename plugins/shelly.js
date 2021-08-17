@@ -5,7 +5,8 @@ class Shelly {
     async discover(ipPrefix) {
         const devices = [];
 
-        for (let i = 1; i <= 254; i++) {
+        for (let i = 113; i <= 113; i++) {
+            //for (let i = 1; i <= 254; i++) {
             const currentIP = `${ipPrefix}${i}`;
             console.log(`Scanning ${currentIP}...`);
 
@@ -28,7 +29,6 @@ class Shelly {
                 console.log('Found device!');
             }
             catch (err) {
-                console.error(err);
                 continue;
             }
         }
@@ -54,7 +54,6 @@ class Shelly {
             };
         }
         catch (err) {
-            console.error(err);
         }
     }
 }
