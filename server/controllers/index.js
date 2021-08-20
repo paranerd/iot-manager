@@ -6,7 +6,7 @@ if (!!process.env.PRODUCTION) {
     router.use(cors());
 }
 
-router.use('/', express.static('../client/dist'));
+router.use('/', express.static('./dist'));
 
 // Include all controllers
 router.use('/api/devices', require('./devices').router);

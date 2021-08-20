@@ -19,9 +19,8 @@ export default {
     };
   },
   async mounted() {
-    console.log("I am mounted in dist?");
     try {
-      const devices = await fetch("http://localhost:8098/api/devices");
+      const devices = await fetch(process.env.VUE_APP_API_URL + "/devices");
 
       this.devices = await devices.json();
 
