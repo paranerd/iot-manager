@@ -5,11 +5,25 @@ const Tasmota = require('../plugins/tasmota');
 const Shelly = require('../plugins/shelly');
 
 const router = express.Router();
+const DEVICES_PATH = 'devices/devices.json';
 
 const plugins = [
     Tasmota,
     Shelly,
 ];
+
+/**
+ * Get all devices
+ */
+router.get('/', async (req, res) => {
+    let devices = {};
+
+    if (fs.existsSync(DEVICES_PATH)) {
+        devices = JSON.parse(fs.readFileSync(DEVICES_PATH));
+    }
+
+    res.json(devices);
+});
 
 /**
  * Discover devices
@@ -46,7 +60,7 @@ function saveDevices(devices) {
         fs.mkdirSync(devicesDir);
     }
 
-    fs.writeFileSync('devices/devices.json', JSON.stringify(devices, null, 2));
+    fs.writeFileSync(DEVICES_PATH, JSON.stringify(devices, null, 2));
 }
 
 module.exports = {
