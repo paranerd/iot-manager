@@ -18,6 +18,9 @@ export default {
       devices: [],
     };
   },
+  created() {
+    document.title = "Home";
+  },
   async mounted() {
     try {
       const devices = await fetch(process.env.VUE_APP_API_URL + "/devices");
