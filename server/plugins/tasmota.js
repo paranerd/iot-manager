@@ -1,54 +1,85 @@
 const axios = require('axios');
 const semver = require('semver');
+const CacheHelper = require('../util/cache');
+const cache = new CacheHelper();
 
 class Tasmota {
-    async discover(ipPrefix) {
-        const devices = [];
-        const currentFirmware = await this.getCurrentFirmwareVersion();
+    static type = 'tasmota';
 
-        for (let i = 52; i <= 52; i++) {
-            //for (let i = 1; i <= 254; i++) {
-            console.log(`Scanning ${ipPrefix}${i}...`);
+    async scan(ip) {
+        const latestFirmware = await this.getLatestFirmwareVersion();
 
-            try {
-                const res = await axios.get(`http://${ipPrefix}${i}/cm?cmnd=status+0`, { timeout: 500 });
+        try {
+            const res = await axios.get(`http://${ip}/cm?cmnd=status+0`, { timeout: 500 });
 
-                if (!res.data || !('Status' in res.data)) {
-                    continue;
-                }
-
-                const installedFirmware = this.cleanFirmwareVersion(res.data.StatusFWR.Version);
-
-                devices.push({
-                    'ip': '192.168.178.' + i,
-                    'hostname': res.data.StatusNET.Hostname,
-                    'firmware': {
-                        'installed': installedFirmware,
-                        'latest': currentFirmware,
-                        'hasUpdate': semver.lt(installedFirmware, currentFirmware),
-                    },
-                    'type': 'tasmota',
-                });
-
-                console.log('Found device!');
+            if (!res.data || !('Status' in res.data)) {
+                return null;
             }
-            catch (err) {
-                continue;
-            }
+
+            const installedFirmware = this.cleanFirmwareVersion(res.data.StatusFWR.Version);
+
+            return {
+                'ip': ip,
+                'hostname': res.data.StatusNET.Hostname,
+                'firmware': {
+                    'installed': installedFirmware,
+                    'latest': latestFirmware,
+                    'hasUpdate': semver.lt(installedFirmware, latestFirmware),
+                },
+                'type': Tasmota.type,
+            };
+        }
+        catch (err) {
+            return null;
+        }
+    }
+
+    async getFirmwareInfo(ip) {
+        const res = await axios.get(`http://${ip}/cm?cmnd=status+2`, { timeout: 500 });
+
+        const installedFirmware = this.cleanFirmwareVersion(res.data.StatusFWR.Version);
+        const latestFirmware = await this.getLatestFirmwareVersion();
+
+        return {
+            'installed': installedFirmware,
+            'latest': latestFirmware,
+            'hasUpdate': semver.lt(installedFirmware, latestFirmware),
         }
 
-        return devices;
     }
 
     cleanFirmwareVersion(version) {
         return version.substring(0, version.lastIndexOf('('));
     }
 
-    async getCurrentFirmwareVersion() {
+    async getLatestFirmwareVersion() {
+        const cachedVersion = cache.get('tasmotaLatestVersion');
+
+        if (cachedVersion && cachedVersion.updated > Date.now() - 24 * 60 * 60 * 1000) {
+            return cachedVersion.version;
+        }
+
         try {
             const res = await axios.get('https://api.github.com/repos/arendst/Tasmota/releases/latest');
+            const version = semver.clean(res.data.tag_name);
 
-            return semver.clean(res.data.tag_name);
+            cache.set('tasmotaLatestVersion', {
+                version: version,
+                updated: Date.now(),
+            });
+
+            return version;
+        }
+        catch (err) {
+            console.error(err);
+        }
+    }
+
+    async upgrade(ip) {
+        try {
+            const res = await axios.get(`http://${ip}/cm?cmnd=upgrade+1`);
+
+            return true;
         }
         catch (err) {
             console.error(err);

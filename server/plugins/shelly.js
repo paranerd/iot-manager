@@ -2,38 +2,28 @@ const axios = require('axios');
 const semver = require('semver');
 
 class Shelly {
-    async discover(ipPrefix) {
-        const devices = [];
+    static type = 'shelly';
 
-        for (let i = 113; i <= 113; i++) {
-            //for (let i = 1; i <= 254; i++) {
-            const currentIP = `${ipPrefix}${i}`;
-            console.log(`Scanning ${currentIP}...`);
+    async scan(ip) {
+        try {
+            const res = await axios.get(`http://${ip}/settings`, { timeout: 500 });
 
-            try {
-                const res = await axios.get(`http://${currentIP}/settings`, { timeout: 500 });
-
-                if (!res.data || !('device' in res.data)) {
-                    continue;
-                }
-
-                const firmware = await this.getFirmwareInfo(currentIP);
-
-                devices.push({
-                    'ip': '192.168.178.' + i,
-                    'hostname': res.data.device.hostname,
-                    'firmware': firmware,
-                    'type': 'shelly',
-                });
-
-                console.log('Found device!');
+            if (!res.data || !('device' in res.data)) {
+                return null;
             }
-            catch (err) {
-                continue;
-            }
+
+            const firmware = await this.getFirmwareInfo(ip);
+
+            return {
+                'ip': ip,
+                'hostname': res.data.device.hostname,
+                'firmware': firmware,
+                'type': Shelly.type,
+            };
         }
-
-        return devices;
+        catch (err) {
+            return null;
+        }
     }
 
     cleanFirmwareVersion(version) {
@@ -56,6 +46,18 @@ class Shelly {
         catch (err) {
         }
     }
+
+    async update(ip) {
+        try {
+            const res = await axios.get(`http://${ip}/ota?update=true`);
+            return true;
+        }
+        catch (err) {
+            console.error(err);
+        }
+    }
 }
+
+
 
 module.exports = Shelly;

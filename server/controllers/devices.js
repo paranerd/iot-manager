@@ -26,32 +26,111 @@ router.get('/', async (req, res) => {
 });
 
 /**
- * Discover devices
+ * Scan for devices
  */
-router.get('/discover', async (req, res) => {
+router.get('/scan', async (req, res) => {
     try {
-        const ipPrefix = getIPPrefix();
-        let devices = [];
+        const devices = [];
 
-        for (const plugin of plugins) {
-            const p = new plugin();
+        const ipAddresses = generateFullIpRange();
 
-            const newDevices = await p.discover(ipPrefix);
+        for (const ip of ipAddresses) {
+            console.log(`Scanning ${ip}...`);
+            for (const Plugin of plugins) {
+                const p = new Plugin();
 
-            devices = [...devices, ...newDevices];
-        };
+                const device = await p.scan(ip);
+
+                if (device) {
+                    console.log('Found device!');
+                    devices.push(device);
+                    break;
+                }
+            }
+        }
 
         console.log(`Found ${devices.length} device(s).`);
 
         saveDevices(devices);
 
-        res.json({
-            result: 'ok',
-        });
+        res.json();
     } catch (err) {
         console.error(err);
     }
 });
+
+function generateFullIpRange() {
+    const ipPrefix = getIPPrefix();
+    const ipAddresses = [];
+
+    for (let i = 1; i < 255; i++) {
+        ipAddresses.push(ipPrefix + i);
+    }
+
+    return ipAddresses;
+}
+
+router.patch('/refresh', async (req, res) => {
+    const devices = loadDevices();
+
+    for (const i in devices) {
+        if (req.query.ip && devices[i].ip !== req.query.ip) {
+            continue;
+        }
+
+        const Plugin = getPlugin(devices[i].type);
+        const p = new Plugin();
+        devices[i] = await p.scan(devices[i].ip);
+    }
+
+    saveDevices(devices);
+
+    res.json();
+});
+
+router.patch('/update', async (req, res) => {
+    const devices = loadDevices();
+
+    for (const i in devices) {
+        if (req.query.ip && devices[i].ip !== req.query.ip) {
+            continue;
+        }
+
+        const Plugin = getPlugin(devices[i].type);
+        const p = new Plugin();
+        await p.update(devices[i].ip);
+
+        devices[i] = await p.scan(devices[i].ip);
+    }
+
+    saveDevices(devices);
+
+    res.json();
+});
+
+function getPlugin(type) {
+    for (const plugin of plugins) {
+        if (plugin.type === type) {
+            return plugin;
+        }
+    }
+}
+
+function loadDevices(ip = null) {
+    try {
+        const devicesRaw = fs.readFileSync(DEVICES_PATH);
+        const devices = JSON.parse(devicesRaw);
+
+        if (ip) {
+            return [devices.find(device => device.ip === ip)];
+        }
+
+        return devices;
+    }
+    catch {
+        return {}
+    }
+}
 
 function saveDevices(devices) {
     const devicesDir = 'devices';
