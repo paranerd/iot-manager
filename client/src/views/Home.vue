@@ -26,8 +26,6 @@ export default {
       const devices = await fetch(process.env.VUE_APP_API_URL + "/devices");
 
       this.devices = await devices.json();
-
-      console.log(this.devices);
     } catch (err) {
       console.error(err);
     }

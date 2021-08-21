@@ -1,28 +1,31 @@
 <template>
-  <!--<div class="devices">
-    <li class="device" v-for="device in devices" :key="device.ip">
-      <span class="hostname">
-        {{ device.hostname }}
-      </span>
-    </li>
-  </div>-->
   <table class="devices">
     <thead>
       <th>Hostname</th>
       <th>Type</th>
       <th>IP</th>
       <th>Firmware</th>
-      <th>Update</th>
+      <th class="text-right">Actions</th>
     </thead>
     <tbody>
       <tr class="device" v-for="device in devices" :key="device.ip">
         <td>{{ device.hostname }}</td>
         <td>{{ device.type }}</td>
         <td>
-          <a :href="device.ip">{{ device.ip }}</a>
+          {{ device.ip }}
         </td>
-        <td>{{ device.firmware.installed }}</td>
-        <td>{{ device.firmware.hasUpdate ? device.firmware.latest : "no" }}</td>
+        <td>
+          {{ device.firmware.installed }}
+          <span class="update-available" v-if="device.firmware.hasUpdate">
+            <strong>({{ device.firmware.latest }})</strong>
+          </span>
+        </td>
+        <td class="text-right">
+          <a :href="'http://' + device.ip" class="btn btn-blue">Open</a>
+          <button class="btn btn-green" v-if="device.firmware.hasUpdate">
+            Update
+          </button>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -34,7 +37,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 table {
   border-collapse: collapse;
   border: 1px solid #ddd;
@@ -43,8 +46,23 @@ table td,
 table th {
   border-top: 1px solid #ddd;
 }
+
+td:first-child {
+  padding-left: 15px !important;
+}
+
+td:last-child {
+  padding-right: 15px !important;
+}
+
 th {
+  height: 50px;
   text-align: left;
+}
+
+th.text-right,
+td.text-right {
+  text-align: right;
 }
 .devices {
   width: 100%;
@@ -59,10 +77,35 @@ th {
   padding: 5px;
 }
 
-.hostname {
-  background: red;
-  justify-content: center;
-  align-items: center;
-  display: flex;
+tr:nth-child(even) {
+  background: #fafafa;
+}
+
+tr:hover {
+  background: #eee;
+}
+
+.btn {
+  margin-left: 5px;
+  border: none;
+  border-radius: 2px;
+  color: white;
+  padding: 15px 15px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 1rem;
+}
+
+.btn-green {
+  background-color: #4caf50;
+}
+
+.btn-blue {
+  background: #39cccc;
+}
+
+.update-available {
+  color: #4caf50;
 }
 </style>
