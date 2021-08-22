@@ -1,13 +1,13 @@
 <template>
   <label class="checkbox">
-    <input class="form-checkbox" type="checkbox" />
+    <input class="form-checkbox" type="checkbox" :checked="checked" />
     <span>{{ label }}</span>
   </label>
 </template>
 
 <script>
 export default {
-  props: ["label"],
+  props: ["label", "checked"],
 };
 </script>
 
@@ -22,7 +22,7 @@ input[type="checkbox"] {
   flex-shrink: 0;
   background: #fff;
   cursor: pointer;
-  border: 1px solid #cbd5e0;
+  border: 1px solid #bac4cf; /*#cbd5e0;*/
   border-radius: 0.25rem;
 }
 
