@@ -8,7 +8,6 @@
 </template>
 
 <script>
-// @ is an alias to /src
 import Devices from "@/components/Devices.vue";
 
 export default {

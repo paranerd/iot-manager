@@ -2,7 +2,12 @@
   <div class="table-responsive">
     <table class="devices">
       <thead>
-        <th><Checkbox /></th>
+        <th>
+          <Checkbox
+            @change="toggleSelectAll"
+            :checked="selected == devices.length"
+          />
+        </th>
         <th>Hostname</th>
         <th>Type</th>
         <th>IP</th>
@@ -10,8 +15,13 @@
         <th class="text-right">Actions</th>
       </thead>
       <tbody>
-        <tr class="device" v-for="device in showDevices" :key="device.ip">
-          <td><Checkbox /></td>
+        <tr class="device" v-for="device in filteredDevices" :key="device.ip">
+          <td>
+            <Checkbox
+              @change="select($event, device)"
+              :checked="device.selected"
+            />
+          </td>
           <td>{{ device.hostname }}</td>
           <td>{{ device.type }}</td>
           <td>
@@ -24,9 +34,15 @@
             </span>
           </td>
           <td class="text-right">
-            <a :href="'http://' + device.ip" class="btn btn-blue">Open</a>
-            <button class="btn btn-green" v-if="device.firmware.hasUpdate">
-              Update
+            <a :href="'http://' + device.ip" class="btn btn-blue" title="Open">
+              <font-awesome-icon icon="external-link-alt" />
+            </a>
+            <button
+              class="btn btn-green"
+              v-if="device.firmware.hasUpdate"
+              title="Upgrade"
+            >
+              <font-awesome-icon icon="angle-double-up" />
             </button>
           </td>
         </tr>
@@ -43,8 +59,21 @@ export default {
   components: {
     Checkbox,
   },
+  methods: {
+    toggleSelectAll(e) {
+      this.devices.forEach((device) => {
+        device.selected = e.target.checked;
+      });
+    },
+    select(e, device) {
+      device.selected = e.target.checked;
+    },
+  },
   computed: {
-    showDevices: function () {
+    selected: function () {
+      return this.devices.filter((device) => device.selected).length;
+    },
+    filteredDevices: function () {
       if (this.devices.length > 0) {
         const filtered = this.devices.filter(
           (obj) =>
@@ -138,6 +167,7 @@ tr:hover {
   text-decoration: none;
   display: inline-block;
   font-size: 1rem;
+  cursor: pointer;
 }
 
 .btn-green {

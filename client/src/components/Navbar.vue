@@ -3,7 +3,6 @@
     <span>IoT-Manager</span>
     <div class="username">paranerd</div>
   </div>
-  <!--<div id="nav"><router-link to="/">Home</router-link></div>-->
 </template>
 
 <script>
