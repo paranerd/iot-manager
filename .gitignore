@@ -1,5 +1,4 @@
 devices/
 node_modules/
 debug.js
-.env
 cache.json

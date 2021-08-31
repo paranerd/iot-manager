@@ -10,6 +10,6 @@ COPY --from=ui-build /app/dist ./dist
 COPY server/ ./
 RUN npm install
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["node", "index.js"]
