@@ -26,9 +26,9 @@ router.get('/', async (req, res) => {
 });
 
 /**
- * Scan for devices
+ * Discover devices
  */
-router.get('/scan', async (req, res) => {
+router.get('/discover', async (req, res) => {
     try {
         const devices = [];
 
