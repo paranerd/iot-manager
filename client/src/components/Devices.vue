@@ -34,7 +34,7 @@
             </span>
           </td>
           <td class="text-right">
-            <a :href="'http://' + device.ip" class="btn btn-blue" title="Open">
+            <a :href="'http://' + device.ip" target="_blank" class="btn btn-blue" title="Open">
               <font-awesome-icon icon="external-link-alt" />
             </a>
             <button
