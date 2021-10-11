@@ -4,8 +4,9 @@ const fs = require('fs');
 const path = require('path');
 
 class ConfigHelper {
-    constructor(location = null) {
-        this.location = location || path.join(__dirname, "../", "config", "config.json");
+    constructor(location = null, autoRefresh = false) {
+        this.location = location || path.resolve(__dirname, "../", "config", "config.json");
+        this.autoRefresh = autoRefresh;
         this.config = this.load();
     }
 
@@ -36,7 +37,9 @@ class ConfigHelper {
      */
     get(keys, def = null) {
         // Refresh config
-        this.config = this.load();
+        if (this.autoRefresh) {
+            this.config = this.load();
+        }
 
         // Convert keys to array if not already
         keys = Array.isArray(keys) ? keys : [keys];
@@ -75,7 +78,9 @@ class ConfigHelper {
      */
     set(keys, value) {
         // Refresh config
-        this.config = this.load();
+        if (this.autoRefresh) {
+            this.config = this.load();
+        }
 
         // Convert keys to array if not already
         keys = Array.isArray(keys) ? keys : [keys];
