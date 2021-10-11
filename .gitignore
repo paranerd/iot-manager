@@ -2,3 +2,4 @@ devices/
 node_modules/
 debug.js
 cache.json
+secrets.json
