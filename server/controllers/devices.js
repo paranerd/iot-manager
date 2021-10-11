@@ -5,7 +5,7 @@ const Tasmota = require('../plugins/tasmota');
 const Shelly = require('../plugins/shelly');
 
 const router = express.Router();
-const DEVICES_PATH = 'devices/devices.json';
+const DEVICES_PATH = 'config/devices.json';
 
 const plugins = [
     Tasmota,
